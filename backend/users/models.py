@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
 
@@ -34,3 +35,26 @@ class User(AbstractUser):
         
     def __str__(self):
         return self.username
+
+class Follow(models.Model):
+    """модель подписок"""
+    user = models.ForeignKey(
+        User,
+        related_name='following',
+        verbose_name='Подписчик',
+        on_delete=models.CASCADE,
+    )
+    author = models.ForeignKey(
+        User,
+        related_name='followers',
+        verbose_name="Автор",
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        ordering = ['-id']
+        constraints = [
+            UniqueConstraint(fields=['user', 'author'], name='unique_follow')
+        ]
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
