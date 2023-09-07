@@ -9,7 +9,7 @@ class User(AbstractUser):
     """Модель User"""
     email = models.EmailField(
         max_length=254,
-        verbose_name=_('Электронная почта'),
+        verbose_name= ('Электронная почта'),
         unique=True,
     )
 
@@ -29,15 +29,15 @@ class User(AbstractUser):
         ]
 
     class Meta:
-        verbose_name = _('Пользователь')
-        verbose_name_plural = _('Пользователи')
+        verbose_name = ('Пользователь')
+        verbose_name_plural = ('Пользователи')
         ordering = ('id',)
         
     def __str__(self):
         return self.username
 
 class Follow(models.Model):
-    """модель подписок"""
+    """Модель подписок"""
     user = models.ForeignKey(
         User,
         related_name='following',
@@ -47,7 +47,7 @@ class Follow(models.Model):
     author = models.ForeignKey(
         User,
         related_name='followers',
-        verbose_name="Автор",
+        verbose_name='Автор',
         on_delete=models.CASCADE,
     )
 
