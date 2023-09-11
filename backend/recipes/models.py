@@ -26,7 +26,7 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveIntegerField(
         ('Время приготовления (в минутах)'),
-        validators=[MinValueValidator(message='Мин. значение -1!')]
+        validators=[MinValueValidator(limit_value=-1, message='Мин. значение -1!')]
     )
 
     def __str__(self):

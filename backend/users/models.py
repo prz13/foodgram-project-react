@@ -1,5 +1,4 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
@@ -12,13 +11,6 @@ class User(AbstractUser):
         verbose_name= ('Электронная почта'),
         unique=True,
     )
-
-    def validate_password(self, value):
-        if len(value) < 8:
-            raise ValidationError(f'''
-                Пароль должен содержать как минимум 8 символов.
-                Допустимые символы: буквы, цифры, символы.
-    ''')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = [
@@ -36,25 +28,31 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
-class Follow(models.Model):
+
+class Subscribe(models.Model):
     """Модель подписок"""
     user = models.ForeignKey(
         User,
-        related_name='following',
-        verbose_name='Подписчик',
         on_delete=models.CASCADE,
+        related_name='subscriber',
+        verbose_name='Подписчик'
     )
     author = models.ForeignKey(
         User,
-        related_name='followers',
-        verbose_name='Автор',
         on_delete=models.CASCADE,
+        related_name='subscribing',
+        verbose_name='Подписан'
     )
 
+    def __str__(self):
+        return f'{self.user.username} - {self.author.username}'
+
     class Meta:
-        ordering = ['-id']
+        verbose_name = 'Подписка на авторов'
+        verbose_name_plural = 'Подписки на авторов'
         constraints = [
-            UniqueConstraint(fields=['user', 'author'], name='unique_follow')
+            models.UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_subscribe'
+            )
         ]
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'

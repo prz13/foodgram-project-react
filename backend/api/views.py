@@ -16,22 +16,19 @@ from django_filters import rest_framework as filters
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 from django.db.models import UniqueConstraint
-from .models import Follow, Ingredient, IngredientInRecipe, Recipe, ShoppingCart, Tag
+from recipes.models import Recipe, Ingredient, Tag, IngredientInRecipe
+from users.models import Follow, User
 from .permissions import IsAuthorOrReadOnly, IsAdminOrReadOnly
-from .serializers import (
-    AddFavoritesSerializer,
-    AdditionalForRecipeSerializer,
+from .filters import RecipeFilter
+from api.serializers import (
     CustomUserCreateSerializer,
     CustomUserSerializer,
-    FavoriteSerializer,
-    FollowSerializer,
-    IngredientInRecipeSerializer,
-    IngredientSerializer,
-    RecipeSerializer,
-    ShoppingListSerializer,
     TagSerializer,
+    IngredientSerializer,
+    IngredientInRecipeSerializer,
+    RecipeSerializer
 )
-
+from djoser.views import UserViewSet
 
 User = get_user_model()
 
@@ -85,7 +82,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend, SearchFilter)
-    filterset_class = IngredientFilter
+    filterset_class = RecipeFilter
     search_fields = ('name',)
 
 class RecipeViewSet(ModelViewSet):
@@ -173,8 +170,8 @@ class RecipeViewSet(ModelViewSet):
             return Response({'errors': f'Рецепта "{recipe.name}" нет в списке покупок.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-class ShoppingListViewSet(ModelViewSet):
-    """Вьюсет для работы с покупками"""
-    queryset = ShoppingCart.objects.all()
-    serializer_class = ShoppingListSerializer
-    permission_classes = (IsAuthenticated,)
+# class ShoppingListViewSet(ModelViewSet):
+#     """Вьюсет для работы с покупками"""
+#     queryset = ShoppingCart.objects.all()
+#     serializer_class = ShoppingListSerializer
+#     permission_classes = (IsAuthenticated,)

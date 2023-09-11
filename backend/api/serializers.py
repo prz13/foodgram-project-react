@@ -1,13 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from .models import (
-    Follow,
-    Ingredient,
-    IngredientInRecipe,
-    Recipe,
-    ShoppingCart,
-    Tag,
-)
+from recipes.models import Recipe, Ingredient, Tag, IngredientInRecipe
+from users.models import  User
+from drf_extra_fields.fields import Base64ImageField
 
 User = get_user_model()
 
