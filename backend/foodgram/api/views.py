@@ -20,10 +20,6 @@ from .serializers import (IngredientSerializer, RecipeCreateSerializer,
                           SubscriptionsSerializer, TagSerializer,
                           UserCreateSerializer, UserReadSerializer)
 
-# -----------------------------------------------------------------------------
-#                            Приложение users
-# -----------------------------------------------------------------------------
-
 
 class UserViewSet(mixins.CreateModelMixin,
                   mixins.ListModelMixin,
@@ -65,28 +61,29 @@ class UserViewSet(mixins.CreateModelMixin,
                                              context={'request': request})
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=True, methods=['post', 'delete'],
+    @action(detail=True, methods=['post'],
             permission_classes=(IsAuthenticated,))
-    def subscribe(self, request, **kwargs):
-        author = get_object_or_404(User, id=kwargs['pk'])
+    def subscribe(self, request, pk=None):
+        author = self.get_object()
+        serializer = SubscribeAuthorSerializer(
+            author, data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        Subscribe.objects.get_or_create(user=request.user, author=author)
+        return Response(serializer.data,
+                        status=status.HTTP_201_CREATED)
 
-        if request.method == 'POST':
-            serializer = SubscribeAuthorSerializer(
-                author, data=request.data, context={"request": request})
-            serializer.is_valid(raise_exception=True)
-            Subscribe.objects.create(user=request.user, author=author)
-            return Response(serializer.data,
-                            status=status.HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
-            get_object_or_404(Subscribe, user=request.user,
-                              author=author).delete()
+    @subscribe.mapping.delete
+    def unsubscribe(self, request, pk=None):
+        author = self.get_object()
+        subscribe_instance = Subscribe.objects.filter(
+            user=request.user, author=author).first()
+        if subscribe_instance:
+            subscribe_instance.delete()
             return Response({'detail': 'Успешная отписка'},
                             status=status.HTTP_204_NO_CONTENT)
+        return Response({'detail': 'Вы не были подписаны на данного автора.'},
+                        status=status.HTTP_400_BAD_REQUEST)
 
-# -----------------------------------------------------------------------------
-#                            Приложение recipes
-# -----------------------------------------------------------------------------
 
 
 class IngredientViewSet(mixins.ListModelMixin,
