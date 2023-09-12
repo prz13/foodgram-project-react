@@ -114,11 +114,9 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
                   'recipes', 'recipes_count')
 
     def get_is_subscribed(self, obj):
-        return (
-            self.context.get('request').user.is_authenticated
-            and Subscribe.objects.filter(user=self.context['request'].user,
-                                         author=obj).exists()
-        )
+        user = self.context.get('request').user
+        return user.is_authenticated and Subscribe.objects.filter(
+            user=user, author=obj).exists()
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
@@ -131,7 +129,6 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
             recipes = recipes[:int(limit)]
         serializer = RecipeSerializer(recipes, many=True, read_only=True)
         return serializer.data
-
 
 class SubscribeAuthorSerializer(serializers.ModelSerializer):
     """Подписки и отписки."""
@@ -149,16 +146,14 @@ class SubscribeAuthorSerializer(serializers.ModelSerializer):
                   'recipes', 'recipes_count')
 
     def validate(self, obj):
-        if (self.context['request'].user == obj):
+        user = self.context['request'].user
+        if user == obj:
             raise serializers.ValidationError({'errors': 'Ошибка подписки.'})
         return obj
 
     def get_is_subscribed(self, obj):
-        return (
-            self.context.get('request').user.is_authenticated
-            and Subscribe.objects.filter(user=self.context['request'].user,
-                                         author=obj).exists()
-        )
+        user = self.context.get('request').user
+        return user.is_authenticated and Subscribe.objects.filter(user=user, author=obj).exists()
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
