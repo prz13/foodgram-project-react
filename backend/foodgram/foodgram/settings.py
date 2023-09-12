@@ -1,19 +1,16 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv, find_dotenv
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-j_89af+30&&4qm*8z9_(^zz8p4-ho8z_m6ylm0s$h!-p@on1_^'
+load_dotenv()
+SECRET_KEY = os.getenv('SECRET_KEY', default='token')
 
-DEBUG = True
+DEBUG = (os.getenv('DEBUG', 'False').lower() == 'true')
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'backend',
-    'db'
-]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='127.0.0.1, localhost').split(', ')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -94,6 +91,24 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LANGUAGE_CODE = 'ru-RU'
+
+TIME_ZONE = 'UTC'
+
+USE_I18N = True
+
+USE_L10N = True
+
+USE_TZ = True
+
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'collected_static'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
@@ -112,28 +127,4 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
 }
 
-LANGUAGE_CODE = 'ru-RU'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = True
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 AUTH_USER_MODEL = 'users.User'
-
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'collected_static'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-CORS_ORIGIN_ALLOW_ALL = True
-
-CORS_URLS_REGEX = r'^/api/.*$'
-
-FILE_NAME = 'Список_ваших_покупок.txt'
