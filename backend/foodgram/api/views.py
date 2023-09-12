@@ -97,8 +97,8 @@ class IngredientViewSet(mixins.ListModelMixin,
 
 
 class TagViewSet(mixins.ListModelMixin,
-                 mixins.RetrieveModelMixin,
-                 viewsets.GenericViewSet):
+                mixins.RetrieveModelMixin,
+                viewsets.GenericViewSet):
     permission_classes = (AllowAny, )
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
@@ -173,7 +173,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             ingredients = Recipe_ingredient.objects.filter(recipe=recipe)
             for ingredient in ingredients:
                 shopping_cart_items.append(
-                    f"{ingredient.ingredient.name} - {ingredient.amount} {ingredient.ingredient.measurement_unit}"
+                    f"{ingredient.ingredient.name} - "
+                    f"{ingredient.amount} {ingredient.ingredient.measurement_unit}"
                 )
 
         file_content = '\n'.join(shopping_cart_items)
