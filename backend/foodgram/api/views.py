@@ -14,15 +14,17 @@ from .filters import RecipeFilter
 from .pagination import CustomPaginator
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (IngredientSerializer, RecipeCreateSerializer,
-                          RecipeReadSerializer, RecipeSerializer,
-                          SetPasswordSerializer, SubscribeAuthorSerializer,
-                          SubscriptionsSerializer, TagSerializer,
-                          UserCreateSerializer, UserReadSerializer)
+                            RecipeReadSerializer, RecipeSerializer,
+                            SetPasswordSerializer, SubscribeAuthorSerializer,
+                            SubscriptionsSerializer, TagSerializer,
+                            UserCreateSerializer, UserReadSerializer)
+
+from collections import defaultdict
 
 
 class UserViewSet(mixins.CreateModelMixin,
-                  mixins.ListModelMixin,
-                  mixins.RetrieveModelMixin,
+                    mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
                   viewsets.GenericViewSet):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
@@ -57,7 +59,7 @@ class UserViewSet(mixins.CreateModelMixin,
         queryset = User.objects.filter(subscribing__user=request.user)
         page = self.paginate_queryset(queryset)
         serializer = SubscriptionsSerializer(page, many=True,
-                                             context={'request': request})
+                                            context={'request': request})
         return self.get_paginated_response(serializer.data)
 
     @action(detail=True, methods=['post'],
@@ -159,6 +161,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response({'detail': 'Рецепт успешно удален из списка покупок.'},
                         status=status.HTTP_204_NO_CONTENT)
 
+
     @action(detail=False, methods=['get'],
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request, **kwargs):
@@ -166,24 +169,22 @@ class RecipeViewSet(viewsets.ModelViewSet):
             shopping_recipe__user=request.user
         )
 
-        shopping_cart_items = []
+        shopping_cart_items = defaultdict(float)
 
         for recipe in shopping_cart_recipes:
             ingredients = Recipe_ingredient.objects.filter(recipe=recipe)
             for ingredient in ingredients:
-                shopping_cart_items.append(
-                    f"{ingredient.ingredient.name} - "
-                    f"{ingredient.amount} {ingredient.ingredient.measurement_unit}"
-                )
+                name = ingredient.ingredient.name
+                amount = ingredient.amount
+                measurement_unit = ingredient.ingredient.measurement_unit
+                shopping_cart_items[name] += amount
 
-        file_content = '\n'.join(shopping_cart_items)
+        shopping_cart_items_formatted = [
+            f"{name} - {amount} {measurement_unit}"
+            for name, amount in shopping_cart_items.items()
+        ]
+
+        file_content = '\n'.join(shopping_cart_items_formatted)
         response = HttpResponse(file_content, content_type='text/plain')
         response['Content-Disposition'] = 'attachment; filename="shopping_cart.txt"'
         return response
-
-
-
-
-
-
-
