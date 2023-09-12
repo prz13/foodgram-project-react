@@ -28,6 +28,7 @@ cd foodgram
 
 
 В папку проекта сохраняем файл: `docker-compose.production.yml`
+
 Запускаем его: sudo docker compose -f docker-compose.production.yml up
 
 
@@ -52,7 +53,7 @@ sudo docker compose -f [имя-файла-docker-compose.yml] exec backend pytho
 sudo docker compose -f [имя-файла-docker-compose.yml] exec backend cp -r /app/collected_static/. /static/static/
 
 
-Проект будет доступен: http://localhost:9000/ (пока под вопросом)
+Проект будет доступен: http://localhost:8000/
 
 
 ## Остановка проекта в консоле: Ctrl+С
