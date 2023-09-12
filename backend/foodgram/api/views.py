@@ -85,7 +85,6 @@ class UserViewSet(mixins.CreateModelMixin,
                         status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class IngredientViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         viewsets.GenericViewSet):
@@ -109,8 +108,8 @@ class TagViewSet(mixins.ListModelMixin,
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     pagination_class = CustomPaginator
-    permission_classes = (IsAuthorOrReadOnly, )
-    filter_backends = (DjangoFilterBackend, )
+    permission_classes = (IsAuthorOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     http_method_names = ['get', 'post', 'patch', 'create', 'delete']
 
@@ -119,70 +118,72 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeReadSerializer
         return RecipeCreateSerializer
 
-    @action(detail=True, methods=['post', 'delete'],
+    @action(detail=True, methods=['post'],
             permission_classes=(IsAuthenticated,))
     def favorite(self, request, **kwargs):
-        recipe = get_object_or_404(Recipe, id=kwargs['pk'])
+        recipe = self.get_object()
 
-        if request.method == 'POST':
-            serializer = RecipeSerializer(recipe, data=request.data,
-                                          context={"request": request})
-            serializer.is_valid(raise_exception=True)
-            if not Favorite.objects.filter(user=request.user,
-                                           recipe=recipe).exists():
-                Favorite.objects.create(user=request.user, recipe=recipe)
-                return Response(serializer.data,
-                                status=status.HTTP_201_CREATED)
-            return Response({'errors': 'Рецепт уже в избранном.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+        if not Favorite.objects.filter(user=request.user, recipe=recipe).exists():
+            favorite = Favorite(user=request.user, recipe=recipe)
+            favorite.save()
+            serializer = RecipeSerializer(recipe, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({'errors': 'Рецепт уже в избранном.'},
+                        status=status.HTTP_400_BAD_REQUEST)
 
-        if request.method == 'DELETE':
-            get_object_or_404(Favorite, user=request.user,
-                              recipe=recipe).delete()
-            return Response({'detail': 'Рецепт успешно удален из избранного.'},
-                            status=status.HTTP_204_NO_CONTENT)
+    @favorite.mapping.delete
+    def unfavorite(self, request, **kwargs):
+        recipe = self.get_object()
+        favorite = get_object_or_404(Favorite, user=request.user, recipe=recipe)
+        favorite.delete()
+        return Response({'detail': 'Рецепт успешно удален из избранного.'},
+                        status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['post', 'delete'],
-            permission_classes=(IsAuthenticated,),
-            pagination_class=None)
+    @action(detail=True, methods=['post'],
+            permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, **kwargs):
-        recipe = get_object_or_404(Recipe, id=kwargs['pk'])
+        recipe = self.get_object()
 
-        if request.method == 'POST':
-            serializer = RecipeSerializer(recipe, data=request.data,
-                                          context={"request": request})
-            serializer.is_valid(raise_exception=True)
-            if not Shopping_cart.objects.filter(user=request.user,
-                                                recipe=recipe).exists():
-                Shopping_cart.objects.create(user=request.user, recipe=recipe)
-                return Response(serializer.data,
-                                status=status.HTTP_201_CREATED)
-            return Response({'errors': 'Рецепт уже в списке покупок.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+        if not Shopping_cart.objects.filter(user=request.user, recipe=recipe).exists():
+            shopping_cart = Shopping_cart(user=request.user, recipe=recipe)
+            shopping_cart.save()
+            serializer = RecipeSerializer(recipe, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({'errors': 'Рецепт уже в списке покупок.'},
+                        status=status.HTTP_400_BAD_REQUEST)
 
-        if request.method == 'DELETE':
-            get_object_or_404(Shopping_cart, user=request.user,
-                              recipe=recipe).delete()
-            return Response(
-                {'detail': 'Рецепт успешно удален из списка покупок.'},
-                status=status.HTTP_204_NO_CONTENT
-            )
+    @shopping_cart.mapping.delete
+    def remove_from_shopping_cart(self, request, **kwargs):
+        recipe = self.get_object()
+        shopping_cart = get_object_or_404(Shopping_cart, user=request.user, recipe=recipe)
+        shopping_cart.delete()
+        return Response({'detail': 'Рецепт успешно удален из списка покупок.'},
+                        status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['get'],
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request, **kwargs):
-        ingredients = (
-            Recipe_ingredient.objects
-            .filter(recipe__shopping_recipe__user=request.user)
-            .values('ingredient')
-            .annotate(total_amount=Sum('amount'))
-            .values_list('ingredient__name', 'total_amount',
-                         'ingredient__measurement_unit')
+        shopping_cart_recipes = Recipe.objects.filter(
+            shopping_recipe__user=request.user
         )
-        file_list = []
-        [file_list.append(
-            '{} - {} {}.'.format(*ingredient)) for ingredient in ingredients]
-        file = HttpResponse('Cписок покупок:\n' + '\n'.join(file_list),
-                            content_type='text/plain')
-        file['Content-Disposition'] = (f'attachment; filename={FILE_NAME}')
-        return file
+
+        shopping_cart_items = []
+
+        for recipe in shopping_cart_recipes:
+            ingredients = Recipe_ingredient.objects.filter(recipe=recipe)
+            for ingredient in ingredients:
+                shopping_cart_items.append(
+                    f"{ingredient.ingredient.name} - {ingredient.amount} {ingredient.ingredient.measurement_unit}"
+                )
+
+        file_content = '\n'.join(shopping_cart_items)
+        response = HttpResponse(file_content, content_type='text/plain')
+        response['Content-Disposition'] = 'attachment; filename="shopping_cart.txt"'
+        return response
+
+
+
+
+
+
+
