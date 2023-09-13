@@ -140,7 +140,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response({'detail': 'Рецепт успешно удален из избранного.'},
                         status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True,
+    @action(detail=True, methods=['post'],
             permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, **kwargs):
         recipe = self.get_object()
