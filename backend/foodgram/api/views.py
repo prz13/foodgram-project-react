@@ -62,9 +62,9 @@ class UserViewSet(mixins.CreateModelMixin,
                                             context={'request': request})
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=True, 
+    @action(detail=True, methods=['post'],
             permission_classes=(IsAuthenticated,))
-    def subscribe(self, request, pk=None):
+    def subscribe(self, request,  pk=None):
         author = self.get_object()
         serializer = SubscribeAuthorSerializer(
             author, data=request.data, context={"request": request})
