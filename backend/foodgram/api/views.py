@@ -35,7 +35,7 @@ class UserViewSet(mixins.CreateModelMixin,
             return UserReadSerializer
         return UserCreateSerializer
 
-    @action(detail=False,
+    @action(detail=False, methods=['get'],
             pagination_class=None,
             permission_classes=(IsAuthenticated,))
     def me(self, request):
@@ -43,7 +43,7 @@ class UserViewSet(mixins.CreateModelMixin,
         return Response(serializer.data,
                         status=status.HTTP_200_OK)
 
-    @action(detail=False,
+    @action(detail=False, methods=['post'],
             permission_classes=(IsAuthenticated,))
     def set_password(self, request):
         serializer = SetPasswordSerializer(request.user, data=request.data)
@@ -52,7 +52,7 @@ class UserViewSet(mixins.CreateModelMixin,
         return Response({'detail': 'Пароль успешно изменен!'},
                         status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False,
+    @action(detail=False, methods=['get'],
             permission_classes=(IsAuthenticated,),
             pagination_class=CustomPaginator)
     def subscriptions(self, request):
@@ -64,7 +64,7 @@ class UserViewSet(mixins.CreateModelMixin,
 
     @action(detail=True, methods=['post'],
             permission_classes=(IsAuthenticated,))
-    def subscribe(self, request,  pk=None):
+    def subscribe(self, request, pk=None):
         author = self.get_object()
         serializer = SubscribeAuthorSerializer(
             author, data=request.data, context={"request": request})
@@ -162,7 +162,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_204_NO_CONTENT)
 
 
-    @action(detail=False,
+    @action(detail=False, methods=['get'],
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request, **kwargs):
         shopping_cart_recipes = Recipe.objects.filter(
