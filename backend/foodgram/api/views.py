@@ -9,6 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from users.models import Subscribe, User
+from collections import defaultdict
 
 from .filters import RecipeFilter
 from .pagination import CustomPaginator
@@ -19,13 +20,12 @@ from .serializers import (IngredientSerializer, RecipeCreateSerializer,
                             SubscriptionsSerializer, TagSerializer,
                             UserCreateSerializer, UserReadSerializer)
 
-from collections import defaultdict
 
-
+"""Класс представления (ViewSet) для пользователей."""
 class UserViewSet(mixins.CreateModelMixin,
                     mixins.ListModelMixin,
                     mixins.RetrieveModelMixin,
-                  viewsets.GenericViewSet):
+                    viewsets.GenericViewSet):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     pagination_class = CustomPaginator
@@ -35,7 +35,7 @@ class UserViewSet(mixins.CreateModelMixin,
             return UserReadSerializer
         return UserCreateSerializer
 
-    @action(detail=False, methods=['get'],
+    @action(detail=False,
             pagination_class=None,
             permission_classes=(IsAuthenticated,))
     def me(self, request):
@@ -43,7 +43,7 @@ class UserViewSet(mixins.CreateModelMixin,
         return Response(serializer.data,
                         status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['post'],
+    @action(detail=False,
             permission_classes=(IsAuthenticated,))
     def set_password(self, request):
         serializer = SetPasswordSerializer(request.user, data=request.data)
@@ -52,7 +52,7 @@ class UserViewSet(mixins.CreateModelMixin,
         return Response({'detail': 'Пароль успешно изменен!'},
                         status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, methods=['get'],
+    @action(detail=False,
             permission_classes=(IsAuthenticated,),
             pagination_class=CustomPaginator)
     def subscriptions(self, request):
@@ -62,7 +62,7 @@ class UserViewSet(mixins.CreateModelMixin,
                                             context={'request': request})
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=True, methods=['post'],
+    @action(detail=True, 
             permission_classes=(IsAuthenticated,))
     def subscribe(self, request, pk=None):
         author = self.get_object()
@@ -85,7 +85,7 @@ class UserViewSet(mixins.CreateModelMixin,
         return Response({'detail': 'Вы не были подписаны на данного автора.'},
                         status=status.HTTP_400_BAD_REQUEST)
 
-
+"""Класс представления (ViewSet) для ингредиентов."""
 class IngredientViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         viewsets.GenericViewSet):
@@ -96,7 +96,7 @@ class IngredientViewSet(mixins.ListModelMixin,
     filter_backends = (filters.SearchFilter, )
     search_fields = ('^name', )
 
-
+"""Класс представления (ViewSet) для тегов."""
 class TagViewSet(mixins.ListModelMixin,
                 mixins.RetrieveModelMixin,
                 viewsets.GenericViewSet):
@@ -105,7 +105,7 @@ class TagViewSet(mixins.ListModelMixin,
     serializer_class = TagSerializer
     pagination_class = None
 
-
+"""Класс представления (ViewSet) для рецептов."""
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     pagination_class = CustomPaginator
@@ -140,7 +140,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response({'detail': 'Рецепт успешно удален из избранного.'},
                         status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['post'],
+    @action(detail=True,
             permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, **kwargs):
         recipe = self.get_object()
@@ -162,7 +162,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_204_NO_CONTENT)
 
 
-    @action(detail=False, methods=['get'],
+    @action(detail=False,
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request, **kwargs):
         shopping_cart_recipes = Recipe.objects.filter(
