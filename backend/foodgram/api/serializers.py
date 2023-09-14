@@ -1,12 +1,29 @@
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions as django_exceptions
+from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_base64.fields import Base64ImageField
+import base64
 from recipes.models import (Favorite, Ingredient, Recipe, Recipe_ingredient,
                             Shopping_cart, Tag)
 from rest_framework import serializers
 from users.models import Subscribe, User
 from django.db import transaction
+
+
+
+class Base64ImageField(serializers.ImageField):
+    """Сериализатор для работы и проверки изображений."""
+    def to_internal_value(self, data):
+        try:
+            if isinstance(data, str) and data.startswith('data:image'):
+                format, imgstr = data.split(';base64,')
+                ext = format.split('/')[-1]
+                decoded_img = base64.b64decode(imgstr)
+                return ContentFile(decoded_img, name='temp.' + ext)
+        except Exception as e:
+            raise serializers.ValidationError(str(e))
+        return super().to_internal_value(data)
 
 
 
@@ -231,7 +248,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     author = UserReadSerializer(read_only=True)
     id = serializers.ReadOnlyField()
     ingredients = RecipeIngredientCreateSerializer(many=True)
-    image = Base64ImageField()
+    image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Recipe
