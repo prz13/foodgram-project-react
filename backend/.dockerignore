@@ -2,4 +2,3 @@ venv
 .git
 db.sqlite3 
 for_test.py
-requirements.in
