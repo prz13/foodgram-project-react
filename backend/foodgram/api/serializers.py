@@ -11,7 +11,6 @@ from users.models import Subscribe, User
 from django.db import transaction
 
 
-
 class Base64ImageField(serializers.ImageField):
     """Сериализатор для работы и проверки изображений."""
     def to_internal_value(self, data):
@@ -24,7 +23,6 @@ class Base64ImageField(serializers.ImageField):
         except Exception as e:
             raise serializers.ValidationError(str(e))
         return super().to_internal_value(data)
-
 
 
 class UserReadSerializer(UserSerializer):
@@ -248,7 +246,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     author = UserReadSerializer(read_only=True)
     id = serializers.ReadOnlyField()
     ingredients = RecipeIngredientCreateSerializer(many=True)
-    image = Base64ImageField(required=False, allow_null=True)
+    image = Base64ImageField()
 
     class Meta:
         model = Recipe
@@ -271,10 +269,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             if not data.get(field):
                 raise serializers.ValidationError(f'{field} - Обязательное поле.')
         
-        if not data.get('tags'):
+        tags = data.get('tags')
+        ingredients = data.get('ingredients')
+        
+        if not tags or len(tags) < 1:
             raise serializers.ValidationError('Нужно указать минимум 1 тег.')
         
-        if not data.get('ingredients'):
+        if not ingredients or len(ingredients) < 1:
             raise serializers.ValidationError('Нужно указать минимум 1 ингредиент.')
         
         ingredient_ids = [item['id'] for item in data.get('ingredients')]
@@ -289,6 +290,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(author=self.context['request'].user, **validated_data)
         recipe.tags.set(tags)
+
         Recipe_ingredient.objects.bulk_create(
             [Recipe_ingredient(
                 recipe=recipe,
@@ -306,13 +308,14 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         instance.cooking_time = validated_data.get('cooking_time', instance.cooking_time)
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        
+
         Recipe_ingredient.objects.filter(
             recipe=instance,
             ingredient__in=instance.ingredients.all()
         ).delete()
-        
+
         instance.tags.set(tags)
+
         Recipe_ingredient.objects.bulk_create(
             [Recipe_ingredient(
                 recipe=instance,
