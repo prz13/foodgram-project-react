@@ -105,7 +105,7 @@ class SetPasswordSerializer(serializers.Serializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для рецептов."""
-    image = Base64ImageField(read_only=True)
+    image = Base64ImageField()
     name = serializers.ReadOnlyField()
     cooking_time = serializers.ReadOnlyField()
 
