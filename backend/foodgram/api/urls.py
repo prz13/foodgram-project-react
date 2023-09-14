@@ -10,6 +10,8 @@ router.register('tags', views.TagViewSet)
 router.register('users', views.UserViewSet)
 router.register('ingredients', views.IngredientViewSet)
 
+urlpatterns = router.urls
+
 urlpatterns = router.urls + [
     path('auth/', include('djoser.urls.authtoken')),
 ]

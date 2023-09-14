@@ -22,9 +22,7 @@ from .serializers import (IngredientSerializer, RecipeCreateSerializer,
 
 
 """Класс представления (ViewSet) для пользователей."""
-class UserViewSet(mixins.CreateModelMixin,
-                    mixins.ListModelMixin,
-                    mixins.RetrieveModelMixin,
+class UserViewSet(viewsets.ModelViewSet,
                     viewsets.GenericViewSet):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
@@ -86,8 +84,7 @@ class UserViewSet(mixins.CreateModelMixin,
                         status=status.HTTP_400_BAD_REQUEST)
 
 """Класс представления (ViewSet) для ингредиентов."""
-class IngredientViewSet(mixins.ListModelMixin,
-                        mixins.RetrieveModelMixin,
+class IngredientViewSet(viewsets.ModelViewSet,
                         viewsets.GenericViewSet):
     queryset = Ingredient.objects.all()
     permission_classes = (AllowAny,)
@@ -97,8 +94,7 @@ class IngredientViewSet(mixins.ListModelMixin,
     search_fields = ('^name', )
 
 """Класс представления (ViewSet) для тегов."""
-class TagViewSet(mixins.ListModelMixin,
-                mixins.RetrieveModelMixin,
+class TagViewSet(viewsets.ModelViewSet,
                 viewsets.GenericViewSet):
     permission_classes = (AllowAny, )
     queryset = Tag.objects.all()
