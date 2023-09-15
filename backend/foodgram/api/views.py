@@ -21,9 +21,10 @@ from .serializers import (IngredientSerializer, RecipeCreateSerializer,
                           SubscriptionsSerializer, TagSerializer,
                           UserCreateSerializer, UserReadSerializer)
 
-"""Класс представления (ViewSet) для пользователей."""
+
 class UserViewSet(viewsets.ModelViewSet,
                     viewsets.GenericViewSet):
+    """Класс представления (ViewSet) для пользователей."""
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     pagination_class = CustomPaginator
@@ -83,26 +84,30 @@ class UserViewSet(viewsets.ModelViewSet,
         return Response({'detail': 'Вы не были подписаны на данного автора.'},
                         status=status.HTTP_400_BAD_REQUEST)
 
-"""Класс представления (ViewSet) для ингредиентов."""
+
 class IngredientViewSet(viewsets.ModelViewSet,
                         viewsets.GenericViewSet):
+    """Класс представления (ViewSet) для ингредиентов."""
     queryset = Ingredient.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = IngredientSerializer
     pagination_class = None
     filter_backends = [filters.SearchFilter]
     search_fields = ['^name']
+    http_method_names = ['post', 'create', 'delete']
 
-"""Класс представления (ViewSet) для тегов."""
+
 class TagViewSet(viewsets.ModelViewSet,
                 viewsets.GenericViewSet):
+    """Класс представления (ViewSet) для тегов."""
     permission_classes = (AllowAny, )
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
 
-"""Класс представления (ViewSet) для рецептов."""
+
 class RecipeViewSet(viewsets.ModelViewSet):
+    """Класс представления (ViewSet) для рецептов."""
     queryset = Recipe.objects.all()
     pagination_class = CustomPaginator
     permission_classes = (IsAuthorOrReadOnly,)
