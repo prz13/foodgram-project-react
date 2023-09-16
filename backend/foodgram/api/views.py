@@ -94,10 +94,9 @@ class IngredientViewSet(viewsets.ModelViewSet,
     pagination_class = None
     filter_backends = [filters.SearchFilter]
     search_fields = ['^name']
-    http_method_names = ['post', 'create', 'delete']
 
 
-"""Класс представления (ViewSet) для тегов."""
+
 class TagViewSet(viewsets.ModelViewSet,
                 viewsets.GenericViewSet):
     """Класс представления (ViewSet) для тегов."""
