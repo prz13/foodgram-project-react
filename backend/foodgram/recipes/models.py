@@ -44,6 +44,7 @@ class Recipe(models.Model):
         'Tag',
         verbose_name='Теги'
     )
+
     def formatted_pub_date(self):
         return self.pub_date.strftime('%Y-%m-%d %H:%M')
 
@@ -54,6 +55,7 @@ class Recipe(models.Model):
 
     def __str__(self):
         return f'{self.name} (опубликовано {self.formatted_pub_date()})'
+
 
 class Ingredient(models.Model):
     """Модель ингредиенты"""
@@ -73,6 +75,7 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return f'{self.name}, {self.measurement_unit}'
+
 
 class Tag(models.Model):
     """Модель тег"""

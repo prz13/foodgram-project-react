@@ -30,6 +30,7 @@ class RecipeFilter(FilterSet):
             return queryset.filter(shopping_recipe__user=user)
         return queryset
 
+
 class IngredientFilter(FilterSet):
     """Фильтр для выбора ингредиентов из базы."""
     name = filters.CharFilter(lookup_expr='istartswith')
