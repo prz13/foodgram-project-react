@@ -11,6 +11,7 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ('username', 'email')
     empty_value_display = None
 
+
 @admin.register(Subscribe)
 class SubscribeAdmin(admin.ModelAdmin):
     list_display = ('pk', 'user', 'author')

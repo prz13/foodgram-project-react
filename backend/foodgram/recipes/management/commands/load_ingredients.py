@@ -2,12 +2,13 @@ import csv
 import os
 import logging
 from foodgram import settings
-from tqdm import tqdm 
+from tqdm import tqdm
 
 from django.core.management.base import BaseCommand
 from recipes.models import Ingredient
 
 logger = logging.getLogger(__name__)
+
 
 class Command(BaseCommand):
     help = "Load ingredients to DB"
@@ -22,14 +23,15 @@ class Command(BaseCommand):
 
                 ingredients = [
                     Ingredient(name=row[0], measurement_unit=row[1])
-                    for row in tqdm(reader, desc="Loading ingredients", unit=" row")
+                    for row in tqdm(reader,
+                                    desc="Loading ingredients",
+                                    unit=" row")
                 ]
 
                 Ingredient.objects.all().delete()
                 Ingredient.objects.bulk_create(ingredients)
-                self.stdout.write(self.style.SUCCESS("The ingredients have been loaded successfully."))
+                self.stdout.write(self.style.SUCCESS("Uploaded successfully!"))
         except FileNotFoundError:
             logger.error("File not found: ingredients.csv")
         except csv.Error as e:
             logger.error(f"CSV Error: {e}")
-

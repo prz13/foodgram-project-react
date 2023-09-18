@@ -26,6 +26,9 @@ services:
     image: prz13/foodgram_frontend
     volumes:
       - ../frontend/:/app/result_build/
+    depends_on:
+      - backend
+
   nginx:
     image: prz13/foodgram_nginx
     ports:
@@ -36,3 +39,7 @@ services:
       - ../docs/:/usr/share/nginx/html/api/docs/
       - static:/collected_static/
       - media:/app/media/
+    restart: always
+    depends_on:
+      - frontend
+

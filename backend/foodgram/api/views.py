@@ -16,14 +16,19 @@ from .filters import RecipeFilter
 from .pagination import CustomPaginator
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (IngredientSerializer, RecipeCreateSerializer,
-                          RecipeReadSerializer, RecipeSerializer,
-                          SetPasswordSerializer, SubscribeAuthorSerializer,
-                          SubscriptionsSerializer, TagSerializer,
-                          UserCreateSerializer, UserReadSerializer)
+                            RecipeReadSerializer, RecipeSerializer,
+                            SetPasswordSerializer, SubscribeAuthorSerializer,
+                            SubscriptionsSerializer, TagSerializer,
+                            UserCreateSerializer, UserReadSerializer
+                        )
 
 
+<<<<<<< HEAD
 class UserViewSet(viewsets.ModelViewSet,
                     viewsets.GenericViewSet):
+=======
+class UserViewSet(viewsets.ModelViewSet,viewsets.GenericViewSet):
+>>>>>>> c4b8e87bf69f6422814fcfd84aea26b741f0b5d6
     """Класс представления (ViewSet) для пользователей."""
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
@@ -57,8 +62,12 @@ class UserViewSet(viewsets.ModelViewSet,
     def subscriptions(self, request):
         queryset = User.objects.filter(subscribing__user=request.user)
         page = self.paginate_queryset(queryset)
-        serializer = SubscriptionsSerializer(page, many=True,
-                                            context={'request': request})
+        serializer = SubscriptionsSerializer(
+            page,
+            many=True,
+            context={'request': request}
+        )
+
         return self.get_paginated_response(serializer.data)
 
     @action(detail=True, methods=['post'],
@@ -137,7 +146,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = self.get_object()
         favorite = get_object_or_404(Favorite, user=request.user, recipe=recipe)
         favorite.delete()
-        return Response({'detail': 'Рецепт успешно удален из избранного.'},
+        return Response(
+            {'detail': 'Рецепт успешно удален из избранного.'},
                         status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=['post'],
@@ -158,7 +168,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = self.get_object()
         shopping_cart = get_object_or_404(Shopping_cart, user=request.user, recipe=recipe)
         shopping_cart.delete()
-        return Response({'detail': 'Рецепт успешно удален из списка покупок.'},
+        return Response({
+            'detail': 'Рецепт успешно удален из списка покупок.'
+        },
                         status=status.HTTP_204_NO_CONTENT)
 
 
