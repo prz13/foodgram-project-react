@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import display
 
-from .models import (Favorite, Ingredient, Recipe, Recipe_ingredient,
+from .models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,
                      Shopping_cart, Tag)
 
 
@@ -35,7 +35,7 @@ class TagAdmin(admin.ModelAdmin):
     empty_value_display = None
 
 
-@admin.register(Recipe_ingredient)
+@admin.register(Recipe_is_ingredient)
 class RecipeIngredientAdmin(admin.ModelAdmin):
     list_display = ('pk', 'recipe', 'ingredient', 'amount')
     list_editable = ('recipe', 'ingredient', 'amount')

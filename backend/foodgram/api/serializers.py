@@ -6,7 +6,7 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_base64.fields import Base64ImageField
-from recipes.models import (Favorite, Ingredient, Recipe, Recipe_ingredient,
+from recipes.models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,
                             Shopping_cart, Tag)
 from rest_framework import serializers
 from users.models import Subscribe, User
@@ -229,7 +229,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         source='ingredient.measurement_unit')
 
     class Meta:
-        model = Recipe_ingredient
+        model = Recipe_is_ingredient
         fields = (
             'id',
             'name',
@@ -279,7 +279,7 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
 
     class Meta:
-        model = Recipe_ingredient
+        model = Recipe_is_ingredient
         fields = ('id', 'amount')
 
 
@@ -347,8 +347,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         )
         recipe.tags.set(tags)
 
-        Recipe_ingredient.objects.bulk_create(
-            [Recipe_ingredient(
+        Recipe_is_ingredient.objects.bulk_create(
+            [Recipe_is_ingredient(
                 recipe=recipe,
                 ingredient=Ingredient.objects.get(pk=ingredient['id']),
                 amount=ingredient['amount']
@@ -367,15 +367,15 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
 
-        Recipe_ingredient.objects.filter(
+        Recipe_is_ingredient.objects.filter(
             recipe=instance,
             ingredient__in=instance.ingredients.all()
         ).delete()
 
         instance.tags.set(tags)
 
-        Recipe_ingredient.objects.bulk_create(
-            [Recipe_ingredient(
+        Recipe_is_ingredient.objects.bulk_create(
+            [Recipe_is_ingredient(
                 recipe=instance,
                 ingredient=Ingredient.objects.get(pk=ingredient['id']),
                 amount=ingredient['amount']

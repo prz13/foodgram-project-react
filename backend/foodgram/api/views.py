@@ -4,7 +4,7 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import (Favorite, Ingredient, Recipe, Recipe_ingredient,
+from recipes.models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,
                             Shopping_cart, Tag)
 from rest_framework import status, viewsets, filters
 from rest_framework.decorators import action
@@ -23,12 +23,8 @@ from .serializers import (IngredientSerializer, RecipeCreateSerializer,
                         )
 
 
-<<<<<<< HEAD
 class UserViewSet(viewsets.ModelViewSet,
                     viewsets.GenericViewSet):
-=======
-class UserViewSet(viewsets.ModelViewSet,viewsets.GenericViewSet):
->>>>>>> c4b8e87bf69f6422814fcfd84aea26b741f0b5d6
     """Класс представления (ViewSet) для пользователей."""
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
@@ -184,7 +180,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         shopping_cart_items = defaultdict(float)
 
         for recipe in shopping_cart_recipes:
-            ingredients = Recipe_ingredient.objects.filter(recipe=recipe)
+            ingredients = Recipe_is_ingredient.objects.filter(recipe=recipe)
             for ingredient in ingredients:
                 name = ingredient.ingredient.name
                 amount = ingredient.amount

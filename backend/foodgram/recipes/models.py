@@ -36,7 +36,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         'Ingredient',
-        through='Recipe_ingredient',
+        through='Recipe_is_ingredient',
         through_fields=('recipe', 'ingredient'),
         verbose_name='Ингредиенты'
     )
@@ -110,7 +110,7 @@ class Tag(models.Model):
         return self.name
 
 
-class Recipe_ingredient(models.Model):
+class Recipe_is_ingredient(models.Model):
     """Ингирдиенты в рецепте модель для связки"""
     recipe = models.ForeignKey(
         Recipe,
