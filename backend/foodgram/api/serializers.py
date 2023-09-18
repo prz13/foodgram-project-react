@@ -32,9 +32,14 @@ class UserReadSerializer(UserSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'id', 'username',
-                    'first_name', 'last_name',
-                    'is_subscribed')
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed'
+        )
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
@@ -49,13 +54,18 @@ class UserCreateSerializer(UserCreateSerializer):
     """Сериализатор создания пользователя."""
     class Meta:
         model = User
-        fields = ('email', 'id', 'username',
-                    'first_name', 'last_name',
-                    'password')
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'password'
+        )
         extra_kwargs = {
+            'email': {'required': True, 'allow_blank': False},
             'first_name': {'required': True, 'allow_blank': False},
             'last_name': {'required': True, 'allow_blank': False},
-            'email': {'required': True, 'allow_blank': False},
         }
 
     def validate(self, data):
@@ -112,8 +122,12 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'name',
-                'image', 'cooking_time')
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time'
+        )
 
 
 class SubscriptionsSerializer(serializers.ModelSerializer):
@@ -124,10 +138,16 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'id',
-                'username', 'first_name',
-                'last_name', 'is_subscribed',
-                'recipes', 'recipes_count')
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count'
+        )
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
@@ -156,10 +176,16 @@ class SubscribeAuthorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'id',
-                'username', 'first_name',
-                'last_name', 'is_subscribed',
-                'recipes', 'recipes_count')
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count'
+        )
 
     def validate(self, obj):
         user = self.context['request'].user
@@ -199,8 +225,12 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe_ingredient
-        fields = ('id', 'name',
-                'measurement_unit', 'amount')
+        fields = (
+            'id',
+            'name',
+            'measurement_unit',
+            'amount'
+        )
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
@@ -215,11 +245,18 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags',
-                'author', 'ingredients',
-                'is_favorited', 'is_in_shopping_cart',
-                'name', 'image',
-                'text', 'cooking_time')
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            'image',
+            'text',
+            'cooking_time'
+        )
 
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
@@ -251,10 +288,16 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'ingredients', 'tags',
-                    'image', 'name', 'text',
-                    'cooking_time', 'author'
-                    )
+        fields = (
+            'id',
+            'ingredients',
+            'tags',
+            'image',
+            'name',
+            'text',
+            'cooking_time',
+            'author'
+        )
         extra_kwargs = {
             'ingredients': {'required': True, 'allow_blank': False},
             'tags': {'required': True, 'allow_blank': False},
