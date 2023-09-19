@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from dotenv import load_dotenv, find_dotenv
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -11,7 +11,7 @@ DEBUG = (os.getenv('DEBUG', 'False').lower() == 'true')
 
 ALLOWED_HOSTS = []
 
-#ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='127.0.0.1, localhost').split(', ')
+#ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='127.0.0.1, localhost').split(', ') # noqa
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -75,20 +75,24 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': ('django.contrib.auth.password_validation'
-                    '.UserAttributeSimilarityValidator'),
+        'NAME': (
+            'django.contrib.auth.password_validation'
+            '.UserAttributeSimilarityValidator'),
     },
     {
-        'NAME': ('django.contrib.auth.password_validation'
-                    '.MinimumLengthValidator'),
+        'NAME': (
+            'django.contrib.auth.password_validation'
+            '.MinimumLengthValidator'),
     },
     {
-        'NAME': ('django.contrib.auth.password_validation'
-                    '.CommonPasswordValidator'),
+        'NAME': (
+            'django.contrib.auth.password_validation'
+            '.CommonPasswordValidator'),
     },
     {
-        'NAME': ('django.contrib.auth.password_validation'
-                    '.NumericPasswordValidator'),
+        'NAME': (
+            'django.contrib.auth.password_validation'
+            '.NumericPasswordValidator'),
     },
 ]
 

@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from django.db.models import Sum
+from django.db.models import Sum # noqa
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -15,16 +15,24 @@ from users.models import Subscribe, User
 from .filters import RecipeFilter
 from .pagination import CustomPaginator
 from .permissions import IsAuthorOrReadOnly
-from .serializers import (IngredientSerializer, RecipeCreateSerializer,
-                            RecipeReadSerializer, RecipeSerializer,
-                            SetPasswordSerializer, SubscribeAuthorSerializer,
-                            SubscriptionsSerializer, TagSerializer,
-                            UserCreateSerializer, UserReadSerializer
-                        )
+from .serializers import (
+    IngredientSerializer,
+    RecipeCreateSerializer,
+    RecipeReadSerializer,
+    RecipeSerializer,
+    SetPasswordSerializer,
+    SubscribeAuthorSerializer,
+    SubscriptionsSerializer,
+    TagSerializer,
+    UserCreateSerializer,
+    UserReadSerializer
+)
 
 
-class UserViewSet(viewsets.ModelViewSet,
-                    viewsets.GenericViewSet):
+class UserViewSet(
+    viewsets.ModelViewSet,
+    viewsets.GenericViewSet
+):
     """Класс представления (ViewSet) для пользователей."""
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
@@ -90,8 +98,10 @@ class UserViewSet(viewsets.ModelViewSet,
                         status=status.HTTP_400_BAD_REQUEST)
 
 
-class IngredientViewSet(viewsets.ModelViewSet,
-                        viewsets.GenericViewSet):
+class IngredientViewSet(
+    viewsets.ModelViewSet,
+    viewsets.GenericViewSet
+):
     """Класс представления (ViewSet) для ингредиентов."""
     queryset = Ingredient.objects.all()
     permission_classes = (AllowAny,)
@@ -101,8 +111,10 @@ class IngredientViewSet(viewsets.ModelViewSet,
     search_fields = ['^name']
 
 
-class TagViewSet(viewsets.ModelViewSet,
-                viewsets.GenericViewSet):
+class TagViewSet(
+    viewsets.ModelViewSet,
+    viewsets.GenericViewSet
+):
     """Класс представления (ViewSet) для тегов."""
     permission_classes = (AllowAny, )
     queryset = Tag.objects.all()
@@ -129,7 +141,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def favorite(self, request, **kwargs):
         recipe = self.get_object()
 
-        if not Favorite.objects.filter(user=request.user, recipe=recipe).exists():
+        if not Favorite.objects.filter(
+            user=request.user, recipe=recipe
+        ).exists():
             favorite = Favorite(user=request.user, recipe=recipe)
             favorite.save()
             serializer = RecipeSerializer(recipe, context={"request": request})
@@ -140,18 +154,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @favorite.mapping.delete
     def unfavorite(self, request, **kwargs):
         recipe = self.get_object()
-        favorite = get_object_or_404(Favorite, user=request.user, recipe=recipe)
+        favorite = get_object_or_404(
+            Favorite,
+            user=request.user,
+            recipe=recipe
+        )
         favorite.delete()
         return Response(
             {'detail': 'Рецепт успешно удален из избранного.'},
-                        status=status.HTTP_204_NO_CONTENT)
+            status=status.HTTP_204_NO_CONTENT
+        )
 
     @action(detail=True, methods=['post'],
             permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, **kwargs):
         recipe = self.get_object()
 
-        if not Shopping_cart.objects.filter(user=request.user, recipe=recipe).exists():
+        if not Shopping_cart.objects.filter(
+            user=request.user, recipe=recipe
+        ).exists():
             shopping_cart = Shopping_cart(user=request.user, recipe=recipe)
             shopping_cart.save()
             serializer = RecipeSerializer(recipe, context={"request": request})
@@ -162,13 +183,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @shopping_cart.mapping.delete
     def remove_from_shopping_cart(self, request, **kwargs):
         recipe = self.get_object()
-        shopping_cart = get_object_or_404(Shopping_cart, user=request.user, recipe=recipe)
+        shopping_cart = get_object_or_404(
+            Shopping_cart,
+            user=request.user,
+            recipe=recipe
+        )
         shopping_cart.delete()
         return Response({
             'detail': 'Рецепт успешно удален из списка покупок.'
         },
                         status=status.HTTP_204_NO_CONTENT)
-
 
     @action(detail=False, methods=['get'],
             permission_classes=(IsAuthenticated,))
@@ -194,5 +218,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         file_content = '\n'.join(shopping_cart_items_formatted)
         response = HttpResponse(file_content, content_type='text/plain')
-        response['Content-Disposition'] = 'attachment; filename="shopping_cart.txt"'
+        response['Content-Disposition'] = \
+            'attachment; filename="shopping_cart.txt"'
         return response

@@ -12,7 +12,7 @@ from rest_framework import serializers
 from users.models import Subscribe, User
 
 
-class Base64ImageField(serializers.ImageField):
+class Base64ImageField(serializers.ImageField): # noqa
     """Сериализатор для работы и проверки изображений."""
     def to_internal_value(self, data):
         try:
@@ -43,7 +43,10 @@ class UserReadSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
-        user = request.user if request and not request.user.is_anonymous else None
+        user = (
+            request.user if request and not request.user.is_anonymous
+            else None
+        )
 
         if user and Subscribe.objects.filter(user=user, author=obj).exists():
             return True
@@ -295,10 +298,16 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'ingredients', 'tags',
-                    'image', 'name', 'text',
-                    'cooking_time', 'author'
-                    )
+        fields = (
+            'id',
+            'ingredients',
+            'tags',
+            'image',
+            'name',
+            'text',
+            'cooking_time',
+            'author'
+        )
         extra_kwargs = {
             'ingredients': {'required': True, 'allow_blank': False},
             'tags': {'required': True, 'allow_blank': False},

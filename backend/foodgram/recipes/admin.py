@@ -1,8 +1,14 @@
 from django.contrib import admin
-from django.contrib.admin import display
+from django.contrib.admin import display # noqa
 
-from .models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,
-                     Shopping_cart, Tag)
+from .models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    Recipe_is_ingredient,
+    Shopping_cart,
+    Tag
+)
 
 
 @admin.register(Recipe)
