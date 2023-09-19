@@ -1,22 +1,21 @@
 from django.contrib import admin
-from django.contrib.admin import display # noqa
+from django.contrib.admin import display  # noqa
 
-from .models import (
-    Favorite,
-    Ingredient,
-    Recipe,
-    Recipe_is_ingredient,
-    Shopping_cart,
-    Tag
-)
+from .models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,
+                     Shopping_cart, Tag)
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'author',
-                    'cooking_time', 'text',
-                    'image', 'in_favorites'
-                    )
+    list_display = (
+        'pk',
+        'name',
+        'author',
+        'cooking_time', 
+        'text',
+        'image',
+        'in_favorites'
+    )
     list_editable = ('name', 'cooking_time', 'text', 'image')
     readonly_fields = ('in_favorites',)
     list_filter = ('name', 'author', 'tags')
