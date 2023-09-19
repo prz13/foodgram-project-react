@@ -1,11 +1,11 @@
 import csv
-import os
 import logging
-from foodgram import settings
-from tqdm import tqdm
+import os
 
 from django.core.management.base import BaseCommand
+from foodgram import settings
 from recipes.models import Ingredient
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
