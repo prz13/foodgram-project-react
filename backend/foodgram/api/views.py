@@ -75,12 +75,7 @@ class UserViewSet(
         Subscribe.objects.get_or_create(user=request.user, author=author)
         return Response(serializer.data,
                         status=status.HTTP_201_CREATED)
-        
-        
-        
-        
-        
-        
+
 
     @subscribe.mapping.delete
     def unsubscribe(self, request, pk=None):
