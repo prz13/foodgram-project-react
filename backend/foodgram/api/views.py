@@ -210,5 +210,5 @@ class RecipeViewSet(viewsets.ModelViewSet):
         file_content = '\n'.join(shopping_cart_items_formatted)
         response = HttpResponse(file_content, content_type='text/plain')
         response['Content-Disposition'] = \
-            'attachment; filename="shopping_cart.txt"'
+            'attachment; filename="shopping_list.txt"'
         return response
