@@ -1,6 +1,5 @@
 from collections import defaultdict
 
-from django.db.models import Sum  # noqa
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -64,7 +63,6 @@ class UserViewSet(
             many=True,
             context={'request': request}
         )
-
         return self.get_paginated_response(serializer.data)
 
     @action(detail=True, methods=['post'],
@@ -77,6 +75,12 @@ class UserViewSet(
         Subscribe.objects.get_or_create(user=request.user, author=author)
         return Response(serializer.data,
                         status=status.HTTP_201_CREATED)
+        
+        
+        
+        
+        
+        
 
     @subscribe.mapping.delete
     def unsubscribe(self, request, pk=None):

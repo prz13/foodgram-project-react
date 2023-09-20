@@ -104,20 +104,16 @@ class SetPasswordSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         current_password = validated_data['current_password']
         new_password = validated_data['new_password']
-
         if not instance.check_password(current_password):
             raise serializers.ValidationError(
                 {'current_password': 'Неправильный пароль.'}
             )
-
         if current_password == new_password:
             raise serializers.ValidationError(
                 {'new_password': 'Новый пароль должен отличаться от старого.'}
             )
-
         instance.set_password(new_password)
         instance.save()
-
         return validated_data
 
 
@@ -324,26 +320,21 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     f'{field} - Обязательное поле.'
                 )
-
         tags = data.get('tags')
         ingredients = data.get('ingredients')
-
         if not tags or len(tags) < 1:
             raise serializers.ValidationError(
                 'Нужно указать минимум 1 тег.'
             )
-
         if not ingredients or len(ingredients) < 1:
             raise serializers.ValidationError(
                 'Нужно указать минимум 1 ингредиент.'
             )
-
         ingredient_ids = [item['id'] for item in data.get('ingredients')]
         if len(ingredient_ids) != len(set(ingredient_ids)):
             raise serializers.ValidationError(
                 'Ингредиенты должны быть уникальны.'
             )
-
         return data
 
     @transaction.atomic
@@ -355,7 +346,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             **validated_data
         )
         recipe.tags.set(tags)
-
         Recipe_is_ingredient.objects.bulk_create(
             [Recipe_is_ingredient(
                 recipe=recipe,

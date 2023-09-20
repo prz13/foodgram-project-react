@@ -8,9 +8,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY', default='token')
 
-DEBUG = (os.getenv('DEBUG', 'False').lower() == 'true')
+DEBUG =  True
 
-ALLOWED_HOSTS = []
+#DEBUG = (os.getenv('DEBUG', 'False').lower() == 'true')
+
+ALLOWED_HOSTS = ['*']
 
 #ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='127.0.0.1, localhost').split(', ') # noqa
 
