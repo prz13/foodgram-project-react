@@ -183,10 +183,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipe=recipe
         )
         shopping_cart.delete()
-        return Response({
-            'detail': 'Рецепт удален из списка покупок.'
-        },
-                        status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'detail': 'Рецепт удален из списка покупок.'},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
     @action(detail=False, methods=['get'],
             permission_classes=(IsAuthenticated,))

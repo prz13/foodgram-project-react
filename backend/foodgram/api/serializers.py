@@ -367,7 +367,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         for field in fields_to_update:
             setattr(instance, field, validated_data.get(
                 field, getattr(instance, field))
-                    )
+            )
         Recipe_is_ingredient.objects.filter(
             recipe=instance,
             ingredient__in=instance.ingredients.all()

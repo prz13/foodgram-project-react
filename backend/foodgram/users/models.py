@@ -16,7 +16,7 @@ class User(AbstractUser):
         'password',
         'first_name',
         'last_name'
-        ]
+    ]
 
     class Meta:
         verbose_name = ('Пользователь')
