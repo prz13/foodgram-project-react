@@ -1,4 +1,5 @@
 import base64
+import re
 
 from django.contrib.auth.hashers import make_password
 from django.core.files.base import ContentFile
@@ -315,7 +316,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 )
         name = data.get('name')
         text = data.get('text')
-        if not name.isalpha():
+        if not re.match(r'^[\w\s.,!?-]+$', name):
             raise serializers.ValidationError(
                 '"Название рецепта" должно содержать только буквы.'
             )
