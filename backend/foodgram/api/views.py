@@ -1,6 +1,6 @@
 from collections import defaultdict
-
 from datetime import datetime
+
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -207,7 +207,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
             for name, amount in shopping_cart_items.items()
         ]
         current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M')
-        header = f"{'Лист покупок'.center(30)}\nДата и время: {current_datetime}\n\n"
+        header = (
+            f"{'Лист покупок'.center(30)}\n"
+            f"Дата и время: {current_datetime}\n\n"
+        )
         file_content = header + '\n'.join(shopping_cart_items_formatted)
 
         response = HttpResponse(file_content, content_type='text/plain')
