@@ -46,20 +46,24 @@ class UserViewSet(
     @action(detail=False, methods=['post'],
             permission_classes=(IsAuthenticated,))
     def set_password(self, request):
-        serializer = SetPasswordSerializer(request.user, data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-        return Response({'detail': 'Пароль успешно изменен!'},
-                        status=status.HTTP_204_NO_CONTENT)
+        serializer = SetPasswordSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {'detail': 'Пароль успешно изменен!'},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
     @action(detail=False, methods=['get'],
-            permission_classes=(IsAuthenticated,),
-            pagination_class=CustomPaginator)
+            permission_classes=(IsAuthenticated,))
     def subscriptions(self, request):
         queryset = User.objects.filter(subscribing__user=request.user)
-        page = self.paginate_queryset(queryset)
+        paginate_queryset = self.paginate_queryset(queryset)
         serializer = SubscriptionsSerializer(
-            page,
+            paginate_queryset,
             many=True,
             context={'request': request}
         )
@@ -83,7 +87,7 @@ class UserViewSet(
             user=request.user, author=author).first()
         if subscribe_instance:
             subscribe_instance.delete()
-            return Response({'detail': 'Успешная отписка'},
+            return Response({'detail': 'Вы отписались'},
                             status=status.HTTP_204_NO_CONTENT)
         return Response({'detail': 'Вы не были подписаны на данного автора.'},
                         status=status.HTTP_400_BAD_REQUEST)
@@ -131,7 +135,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             permission_classes=(IsAuthenticated,))
     def favorite(self, request, **kwargs):
         recipe = self.get_object()
-
         if not Favorite.objects.filter(
             user=request.user, recipe=recipe
         ).exists():
@@ -139,7 +142,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             favorite.save()
             serializer = RecipeSerializer(recipe, context={"request": request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response({'errors': 'Рецепт уже в избранном.'},
+        return Response({'errors': 'Рецепт есть избранном.'},
                         status=status.HTTP_400_BAD_REQUEST)
 
     @favorite.mapping.delete
@@ -152,7 +155,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
         favorite.delete()
         return Response(
-            {'detail': 'Рецепт успешно удален из избранного.'},
+            {'detail': 'Рецепт удален из избранного.'},
             status=status.HTTP_204_NO_CONTENT
         )
 
@@ -160,7 +163,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, **kwargs):
         recipe = self.get_object()
-
         if not Shopping_cart.objects.filter(
             user=request.user, recipe=recipe
         ).exists():
@@ -181,7 +183,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
         shopping_cart.delete()
         return Response({
-            'detail': 'Рецепт успешно удален из списка покупок.'
+            'detail': 'Рецепт удален из списка покупок.'
         },
                         status=status.HTTP_204_NO_CONTENT)
 
@@ -191,9 +193,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         shopping_cart_recipes = Recipe.objects.filter(
             shopping_recipe__user=request.user
         )
-
         shopping_cart_items = defaultdict(float)
-
         for recipe in shopping_cart_recipes:
             ingredients = Recipe_is_ingredient.objects.filter(recipe=recipe)
             for ingredient in ingredients:
@@ -201,12 +201,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 amount = ingredient.amount
                 measurement_unit = ingredient.ingredient.measurement_unit
                 shopping_cart_items[name] += amount
-
         shopping_cart_items_formatted = [
             f"{name} - {amount} {measurement_unit}"
             for name, amount in shopping_cart_items.items()
         ]
-
         file_content = '\n'.join(shopping_cart_items_formatted)
         response = HttpResponse(file_content, content_type='text/plain')
         response['Content-Disposition'] = \

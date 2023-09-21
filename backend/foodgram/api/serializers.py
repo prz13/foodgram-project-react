@@ -1,7 +1,6 @@
 import base64
 
-from django.contrib.auth.password_validation import validate_password
-from django.core import exceptions as django_exceptions
+from django.contrib.auth.hashers import make_password
 from django.core.files.base import ContentFile
 from django.db import transaction
 from djoser.serializers import UserCreateSerializer, UserSerializer
@@ -9,6 +8,7 @@ from drf_base64.fields import Base64ImageField
 from recipes.models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,
                             Shopping_cart, Tag)
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from users.models import Subscribe, User
 
 
@@ -89,32 +89,25 @@ class UserCreateSerializer(UserCreateSerializer):
 
 class SetPasswordSerializer(serializers.Serializer):
     """Сериализатор для изменения пароля."""
-    current_password = serializers.CharField()
-    new_password = serializers.CharField()
+    current_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
 
-    def validate(self, obj):
-        try:
-            validate_password(obj['new_password'])
-        except django_exceptions.ValidationError as e:
-            raise serializers.ValidationError(
-                {'new_password': list(e.messages)}
-            )
-        return super().validate(obj)
-
-    def update(self, instance, validated_data):
-        current_password = validated_data['current_password']
-        new_password = validated_data['new_password']
-        if not instance.check_password(current_password):
-            raise serializers.ValidationError(
-                {'current_password': 'Неправильный пароль.'}
-            )
+    def validate(self, data):
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        if not self.context['request'].user.check_password(current_password):
+            raise ValidationError({'current_password': 'Неправильный пароль.'})
         if current_password == new_password:
-            raise serializers.ValidationError(
+            raise ValidationError(
                 {'new_password': 'Новый пароль должен отличаться от старого.'}
             )
-        instance.set_password(new_password)
-        instance.save()
-        return validated_data
+        return data
+
+    def save(self):
+        new_password = self.validated_data['new_password']
+        user = self.context['request'].user
+        user.password = make_password(new_password)
+        user.save()
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -320,18 +313,29 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     f'{field} - Обязательное поле.'
                 )
-        tags = data.get('tags')
-        ingredients = data.get('ingredients')
-        if not tags or len(tags) < 1:
+        name = data.get('name')
+        text = data.get('text')
+        if not name.isalpha():
             raise serializers.ValidationError(
-                'Нужно указать минимум 1 тег.'
+                '"Название рецепта" должно содержать только буквы.'
             )
-        if not ingredients or len(ingredients) < 1:
+        if len(text) < 10:
+            raise serializers.ValidationError(
+                '"Описание рецепта" должно содержать не менее 10 символов.'
+            )
+        text_exists = Recipe.objects.filter(text=text).exists()
+        if text_exists:
+            raise ValidationError('Рецепт с таким описанием уже существует.')
+        tags = data.get('tags', [])
+        ingredients = data.get('ingredients', [])
+        if not tags:
+            raise serializers.ValidationError('Нужно указать минимум 1 тег.')
+        if not ingredients:
             raise serializers.ValidationError(
                 'Нужно указать минимум 1 ингредиент.'
             )
-        ingredient_ids = [item['id'] for item in data.get('ingredients')]
-        if len(ingredient_ids) != len(set(ingredient_ids)):
+        ingredient_ids = {item['id'] for item in ingredients}
+        if len(ingredient_ids) != len(ingredients):
             raise serializers.ValidationError(
                 'Ингредиенты должны быть уникальны.'
             )
@@ -355,24 +359,19 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         )
         return recipe
 
-    @transaction.atomic
     def update(self, instance, validated_data):
-        instance.image = validated_data.get('image', instance.image)
-        instance.name = validated_data.get('name', instance.name)
-        instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get(
-            'cooking_time', instance.cooking_time
-        )
+        fields_to_update = ['image', 'name', 'text', 'cooking_time']
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-
+        for field in fields_to_update:
+            setattr(instance, field, validated_data.get(
+                field, getattr(instance, field))
+                    )
         Recipe_is_ingredient.objects.filter(
             recipe=instance,
             ingredient__in=instance.ingredients.all()
         ).delete()
-
         instance.tags.set(tags)
-
         Recipe_is_ingredient.objects.bulk_create(
             [Recipe_is_ingredient(
                 recipe=instance,
@@ -380,7 +379,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 amount=ingredient['amount']
             ) for ingredient in ingredients]
         )
-
         instance.save()
         return instance
 
