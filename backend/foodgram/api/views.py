@@ -1,17 +1,16 @@
 from collections import defaultdict
 from datetime import datetime
 
-from django.db.models import Sum, F
+from django.db.models import F, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from recipes.models import Favorite, Ingredient, Recipe, Shopping_cart, Tag
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from users.models import Subscribe, User
-from recipes.models import (Favorite, Ingredient, Recipe,
-                            Shopping_cart, Tag)
 
 from .filters import RecipeFilter
 from .pagination import CustomPaginator
