@@ -6,12 +6,11 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_base64.fields import Base64ImageField
-
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from users.models import Subscribe, User
-from recipes.models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,  # noqa
-                            Shopping_cart, Tag) # noqa
+from recipes.models import (Favorite, Ingredient, Recipe,  # noqa
+                            Recipe_is_ingredient, Shopping_cart, Tag)
 
 
 class Base64ImageField(serializers.ImageField): # noqa
