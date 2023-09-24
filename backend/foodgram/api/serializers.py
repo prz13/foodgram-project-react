@@ -10,7 +10,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from users.models import Subscribe, User
 from recipes.models import (Favorite, Ingredient, Recipe,  # noqa
-                            Recipe_is_ingredient, Shopping_cart, Tag)
+                            Recipe_is_ingredient, Shopping_cart, Tag)  # noqa
 
 
 class Base64ImageField(serializers.ImageField): # noqa
