@@ -4,9 +4,10 @@ from django.db import models
 
 class User(AbstractUser):
     """Модель User"""
+
     email = models.EmailField(
         max_length=254,
-        verbose_name=('Электронная почта'),
+        verbose_name='Электронная почта',
         unique=True,
     )
 
@@ -29,6 +30,7 @@ class User(AbstractUser):
 
 class Subscribe(models.Model):
     """Модель подписок"""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

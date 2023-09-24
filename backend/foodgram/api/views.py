@@ -1,16 +1,17 @@
 from collections import defaultdict
 from datetime import datetime
 
+from django.db.models import Sum, F
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,
-                            Shopping_cart, Tag)
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from users.models import Subscribe, User
+from recipes.models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,
+                            Shopping_cart, Tag)
 
 from .filters import RecipeFilter
 from .pagination import CustomPaginator
@@ -27,6 +28,7 @@ class UserViewSet(
     viewsets.GenericViewSet
 ):
     """Класс представления (ViewSet) для пользователей."""
+
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     pagination_class = CustomPaginator
@@ -99,6 +101,7 @@ class IngredientViewSet(
     viewsets.GenericViewSet
 ):
     """Класс представления (ViewSet) для ингредиентов."""
+
     queryset = Ingredient.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = IngredientSerializer
@@ -112,6 +115,7 @@ class TagViewSet(
     viewsets.GenericViewSet
 ):
     """Класс представления (ViewSet) для тегов."""
+
     permission_classes = (AllowAny, )
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
@@ -120,6 +124,7 @@ class TagViewSet(
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Класс представления (ViewSet) для рецептов."""
+
     queryset = Recipe.objects.all()
     pagination_class = CustomPaginator
     permission_classes = (IsAuthorOrReadOnly,)
@@ -193,19 +198,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request, **kwargs):
         shopping_cart_recipes = Recipe.objects.filter(
             shopping_recipe__user=request.user
+        ).annotate(
+            total_amount=Sum('recipeisingredient__amount'),
+            ingredient_name=F('recipeisingredient__ingredient__name'),
+            measurement_unit=F('recipeisingredient__ingredient__measurement_unit')
         )
         shopping_cart_items = defaultdict(float)
         for recipe in shopping_cart_recipes:
-            ingredients = Recipe_is_ingredient.objects.filter(recipe=recipe)
-            for ingredient in ingredients:
-                name = ingredient.ingredient.name
-                amount = ingredient.amount
-                measurement_unit = ingredient.ingredient.measurement_unit
-                shopping_cart_items[name] += amount
-        shopping_cart_items_formatted = [
-            f"{name} - {amount} {measurement_unit}"
-            for name, amount in shopping_cart_items.items()
-        ]
+            name = recipe.ingredient_name
+            amount = recipe.total_amount
+            measurement_unit = recipe.measurement_unit
+            shopping_cart_items[name] += amount
+
         current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M')
         header = (
             f"{'Лист покупок'.center(30)}\n"

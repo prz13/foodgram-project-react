@@ -6,15 +6,16 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_base64.fields import Base64ImageField
-from recipes.models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,
-                            Shopping_cart, Tag)
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from users.models import Subscribe, User
-
+from recipes.models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,
+                            Shopping_cart, Tag)
 
 class Base64ImageField(serializers.ImageField): # noqa
     """Сериализатор для работы и проверки изображений."""
+
     def to_internal_value(self, data):
         try:
             if isinstance(data, str) and data.startswith('data:image'):
@@ -29,6 +30,7 @@ class Base64ImageField(serializers.ImageField): # noqa
 
 class UserReadSerializer(UserSerializer):
     """Сериализатор пользователя с информацией о подписках."""
+
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -56,6 +58,7 @@ class UserReadSerializer(UserSerializer):
 
 class UserCreateSerializer(UserCreateSerializer):
     """Сериализатор создания пользователя."""
+
     class Meta:
         model = User
         fields = (
@@ -81,7 +84,8 @@ class UserCreateSerializer(UserCreateSerializer):
             'subscriptions',
             'subscribe'
         ]
-        if self.initial_data.get('username') in invalid_usernames:
+        input_username = self.initial_data.get('username', '').lower() 
+        if input_username in (name.lower() for name in invalid_usernames):
             raise serializers.ValidationError(
                 {'username': 'Вы не можете использовать этот username.'}
             )
@@ -90,6 +94,7 @@ class UserCreateSerializer(UserCreateSerializer):
 
 class SetPasswordSerializer(serializers.Serializer):
     """Сериализатор для изменения пароля."""
+
     current_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True)
 
@@ -113,6 +118,7 @@ class SetPasswordSerializer(serializers.Serializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для рецептов."""
+
     image = Base64ImageField()
     name = serializers.ReadOnlyField()
     cooking_time = serializers.ReadOnlyField()
@@ -129,6 +135,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class SubscriptionsSerializer(serializers.ModelSerializer):
     """Сериализатор для списка подписок пользователя."""
+
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
@@ -166,6 +173,7 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
 
 class SubscribeAuthorSerializer(serializers.ModelSerializer):
     """Сериализатор для информации о пользователе и его подписке."""
+
     email = serializers.ReadOnlyField()
     username = serializers.ReadOnlyField()
     is_subscribed = serializers.SerializerMethodField()
@@ -188,7 +196,9 @@ class SubscribeAuthorSerializer(serializers.ModelSerializer):
     def validate(self, obj):
         user = self.context['request'].user
         if user == obj:
-            raise serializers.ValidationError({'errors': 'Ошибка подписки.'})
+            raise serializers.ValidationError(
+                {'errors': 'Вы не можете подписаться на самого себя.'}
+            )
         return obj
 
     def get_is_subscribed(self, obj):
@@ -202,6 +212,7 @@ class SubscribeAuthorSerializer(serializers.ModelSerializer):
 
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для ингридиентов."""
+
     class Meta:
         model = Ingredient
         fields = '__all__'
@@ -209,6 +220,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
     """Сериализатор для тегОВ."""
+
     class Meta:
         model = Tag
         fields = '__all__'
@@ -216,6 +228,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для ингредиентов рецепт@."""
+
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
@@ -233,6 +246,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class RecipeReadSerializer(serializers.ModelSerializer):
     """Сериализатор для чтения информации о рецепте."""
+
     author = UserReadSerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     ingredients = RecipeIngredientSerializer(
@@ -269,6 +283,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
 class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
     """Сериализатор для создания ингредиентов рецепта."""
+
     id = serializers.IntegerField()
 
     class Meta:
@@ -278,6 +293,7 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
     """Сериализатор для создания и обновления рецепта."""
+
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all()
     )
