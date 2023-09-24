@@ -84,7 +84,7 @@ class UserCreateSerializer(UserCreateSerializer):
             'subscriptions',
             'subscribe'
         ]
-        input_username = self.initial_data.get('username', '').lower() 
+        input_username = self.initial_data.get('username', '').lower()
         if input_username in (name.lower() for name in invalid_usernames):
             raise serializers.ValidationError(
                 {'username': 'Вы не можете использовать этот username.'}

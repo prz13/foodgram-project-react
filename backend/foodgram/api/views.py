@@ -10,7 +10,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from users.models import Subscribe, User
-from recipes.models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,
+from recipes.models import (Favorite, Ingredient, Recipe,
                             Shopping_cart, Tag)
 
 from .filters import RecipeFilter
@@ -201,13 +201,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).annotate(
             total_amount=Sum('recipeisingredient__amount'),
             ingredient_name=F('recipeisingredient__ingredient__name'),
-            measurement_unit=F('recipeisingredient__ingredient__measurement_unit')
+            measurement_unit=(
+                F('recipeisingredient__ingredient__measurement_unit')
+            )
         )
         shopping_cart_items = defaultdict(float)
         for recipe in shopping_cart_recipes:
             name = recipe.ingredient_name
             amount = recipe.total_amount
-            measurement_unit = recipe.measurement_unit
             shopping_cart_items[name] += amount
 
         current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M')
@@ -215,7 +216,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             f"{'Лист покупок'.center(30)}\n"
             f"Дата и время: {current_datetime}\n\n"
         )
-        file_content = header + '\n'.join(shopping_cart_items_formatted)
+        file_content = header + '\n'.join(shopping_cart_items)
 
         response = HttpResponse(file_content, content_type='text/plain')
         response['Content-Disposition'] = \
