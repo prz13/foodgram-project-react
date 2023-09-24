@@ -10,7 +10,7 @@ from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from users.models import Subscribe, User
-from recipes.models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,
+from recipes.models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,  # noqa
                             Shopping_cart, Tag) # noqa
 
 
