@@ -75,6 +75,14 @@ class UserViewSet(
             permission_classes=(IsAuthenticated,))
     def subscribe(self, request, pk=None):
         author = self.get_object()
+        existing_subscription = (
+            Subscribe.objects.filter(user=request.user, author=author).first()
+        )
+        if existing_subscription:
+            return Response(
+                {"error": "Вы уже подписаны на этого автора."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         serializer = SubscribeAuthorSerializer(
             author, data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
