@@ -17,7 +17,7 @@ class RecipeFilter(FilterSet):
 
     class Meta:
         model = Recipe
-        fields = ('tags', 'author',)
+        fields = ['tags', 'author',]
 
     def is_favorited_filter(self, queryset, name, value):
         user = self.request.user
@@ -39,4 +39,4 @@ class IngredientFilter(FilterSet):
 
     class Meta:
         model = Ingredient
-        fields = ('name')
+        fields = ['name']
