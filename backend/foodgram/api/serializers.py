@@ -362,6 +362,12 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
+        ingredient_ids = [ingredient['id'] for ingredient in ingredients]
+        if not Ingredient.objects.filter(pk__in=ingredient_ids).exists():
+            raise serializers.ValidationError(
+                'Ингирдиент не существуют, '
+                'выберети из существующих ингридиентов.'
+            )
         recipe = Recipe.objects.create(
             author=self.context['request'].user,
             **validated_data

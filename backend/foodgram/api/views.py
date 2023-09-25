@@ -1,11 +1,11 @@
-from collections import defaultdict
 from datetime import datetime
 
-from django.db.models import F, Sum
+from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import Favorite, Ingredient, Recipe, Shopping_cart, Tag
+from recipes.models import (Favorite, Ingredient, Recipe, Recipe_is_ingredient,
+                            Shopping_cart, Tag)
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -205,27 +205,29 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request, **kwargs):
         shopping_cart_recipes = Recipe.objects.filter(
             shopping_recipe__user=request.user
-        ).annotate(
-            total_amount=Sum('recipeisingredient__amount'),
-            ingredient_name=F('recipeisingredient__ingredient__name'),
-            measurement_unit=(
-                F('recipeisingredient__ingredient__measurement_unit')
-            )
         )
-        shopping_cart_items = defaultdict(float)
-        for recipe in shopping_cart_recipes:
-            name = recipe.ingredient_name
-            amount = recipe.total_amount
-            shopping_cart_items[name] += amount
+        shopping_cart_items = (
+            Recipe_is_ingredient.objects
+            .filter(recipe__in=shopping_cart_recipes)
+            .values('ingredient__name', 'ingredient__measurement_unit')
+            .annotate(total_amount=Sum('amount'))
+        )
+        shopping_cart_items_formatted = [
+            (
+                f"{item['ingredient__name']} - {item['total_amount']} "
+                f"{item['ingredient__measurement_unit']}"
+            )
+            for item in shopping_cart_items
+        ]
 
-        current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M')
+        current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%A')
         header = (
             f"{'Лист покупок'.center(30)}\n"
             f"Дата и время: {current_datetime}\n\n"
         )
-        file_content = header + '\n'.join(shopping_cart_items)
 
+        file_content = header + '\n'.join(shopping_cart_items_formatted)
         response = HttpResponse(file_content, content_type='text/plain')
         response['Content-Disposition'] = \
-            'attachment; filename="shopping_list.txt"'
+            'attachment; filename="shopping_cart.txt"'
         return response
