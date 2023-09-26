@@ -80,12 +80,7 @@ class UserCreateSerializer(UserCreateSerializer):
     def validate(self, data):
         data = super().validate(data)
 
-        invalid_usernames = [
-            'me',
-            'set_password',
-            'subscriptions',
-            'subscribe'
-        ]
+        invalid_usernames = User.INVALID_USERNAMES
         input_username = self.initial_data.get('username', '').lower()
         if input_username in (name.lower() for name in invalid_usernames):
             raise serializers.ValidationError(

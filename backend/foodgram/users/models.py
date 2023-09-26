@@ -19,6 +19,13 @@ class User(AbstractUser):
         'last_name'
     ]
 
+    INVALID_USERNAMES = [
+        'me',
+        'set_password',
+        'subscriptions',
+        'subscribe'
+    ]
+
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
