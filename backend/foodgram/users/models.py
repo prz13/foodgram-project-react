@@ -3,7 +3,7 @@ from django.db import models
 
 
 class User(AbstractUser):
-    """Модель User"""
+    """Модель User."""
 
     email = models.EmailField(
         max_length=254,
@@ -20,8 +20,8 @@ class User(AbstractUser):
     ]
 
     class Meta:
-        verbose_name = ('Пользователь')
-        verbose_name_plural = ('Пользователи')
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
         ordering = ('id',)
 
     def __str__(self):

@@ -1,5 +1,7 @@
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
+
 from users.models import User
 
 
@@ -77,7 +79,7 @@ class Ingredient(models.Model):
 
 
 class Tag(models.Model):
-    """Модель тег"""
+    """Модель тег."""
 
     name = models.CharField(
         'Название',
@@ -102,6 +104,15 @@ class Tag(models.Model):
         null=True
     )
 
+    def clean(self):
+        existing_tags = Tag.objects.exclude(pk=self.pk)
+        for tag in existing_tags:
+            if self.color == tag.color:
+                raise ValidationError(
+                    f'Цвет "{self.color}" уже используется для тега'
+                    f'"{tag.name}" и не может быть использован снова.'
+                )
+
     class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
@@ -111,7 +122,7 @@ class Tag(models.Model):
 
 
 class Recipe_is_ingredient(models.Model):
-    """Ингирдиенты в рецепте модель для связки"""
+    """Ингирдиенты в рецепте модель для связки."""
 
     recipe = models.ForeignKey(
         Recipe,
@@ -148,7 +159,7 @@ class Recipe_is_ingredient(models.Model):
 
 
 class Favorite(models.Model):
-    """Модель избранное"""
+    """Модель избранное."""
 
     user = models.ForeignKey(
         User,
@@ -178,7 +189,7 @@ class Favorite(models.Model):
 
 
 class Shopping_cart(models.Model):
-    """Модель список покупок"""
+    """Модель список покупок."""
 
     user = models.ForeignKey(
         User,

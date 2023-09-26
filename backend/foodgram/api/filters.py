@@ -33,8 +33,8 @@ class RecipeFilter(FilterSet):
 
 
 class IngredientFilter(FilterSet):
-
     """Фильтр для выбора ингредиентов из базы."""
+
     name = filters.CharFilter(lookup_expr='istartswith')
 
     class Meta:
