@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _  # noqa
 from users.models import User
 
 
@@ -112,7 +112,7 @@ class Tag(models.Model):
             if normalized_color == tag.color.lower():
                 raise ValidationError(
                     ('Цвет "{color}" уже используется для тега "{name}" '
-                    'и не может быть использован снова.').format(
+                        'и не может быть использован снова.').format(
                         color=self.color,
                         name=tag.name
                     )
