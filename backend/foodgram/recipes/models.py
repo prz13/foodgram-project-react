@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
-
+from django.utils.translation import gettext_lazy as _
 from users.models import User
 
 
@@ -107,11 +107,15 @@ class Tag(models.Model):
 
     def clean(self):
         existing_tags = Tag.objects.exclude(pk=self.pk)
+        normalized_color = self.color.lower() if self.color else None
         for tag in existing_tags:
-            if self.color == tag.color:
+            if normalized_color == tag.color.lower():
                 raise ValidationError(
-                    f'Цвет "{self.color}" уже используется для тега'
-                    f'"{tag.name}" и не может быть использован снова.'
+                    ('Цвет "{color}" уже используется для тега "{name}" '
+                    'и не может быть использован снова.').format(
+                        color=self.color,
+                        name=tag.name
+                    )
                 )
 
     class Meta:
